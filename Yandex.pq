@@ -25,7 +25,18 @@ FuncType = type function (
         Documentation.FieldCaption = "End date:",
         Documentation.FieldDescription = "Enter the last date of your statistics. You can specify date in YYYY-MM-DD format or use dynamic formats: today, yesterday, 69daysAgo.",
         Documentation.SampleValues = {"yesterday"}
+    ]),
+     optional goals as (type text meta [
+        Documentation.FieldCaption = "Goals:",
+        Documentation.FieldDescription = "Goals list",
+        Documentation.SampleValues = {"12345,01234,76543"}
+    ]),
+     optional model as (type text meta [
+        Documentation.FieldCaption = "Attribution model:",
+        Documentation.FieldDescription = "Attribution model",
+         Documentation.AllowedValues = { "FC", "LC", "LSC", "LYDC"}
     ])
+
     )
     as table meta [
         Documentation.Name = "Yandex.Direct Function",
@@ -38,13 +49,13 @@ FuncType = type function (
         Documentation.Examples = {
         [
             Description = "Returns Impressions,Clicks,Cost by Date and Campaigns.",
-            Code = "Yandex.Direct(""y.director"",""Date,CampaignName,CampaignId,Impressions,Clicks,Cost"",""2020-02-20"",""yesterday"")",
+            Code = "Yandex.Direct(""y.director"",""Date,CampaignName,CampaignId,Impressions,Clicks,Cost"",""2020-02-20"",""yesterday"", null, null)",
             Result = "Table with 6 columns"
         ],
         [
             Description = "Returns conversions on goal №1234567 (first click attribution) by Keyword and Device.",
-            Code = "Yandex.Direct(""y.director"",""Criterion,Device,Conversions_1234567_FC"",""150daysAgo"",""today"")",
-            Result ="Table with 3 columns"
+            Code = "Yandex.Direct(""y.director"",""Criterion,Device,Conversions"",""150daysAgo"",""today"", ""12345,23456,34567"",""LYDC"")",
+            Result ="Table with 5 columns: Criterion,Device and 3 goal conversions"
         ],
         [
             Description = "Copy this url to know about all dimensions, metrics and modes:",
@@ -60,15 +71,18 @@ windowWidth = 1000;
 windowHeight = 800;
 
 
-Yandex.Data = (login as text,  columns as text,   start as text,  end as text)=>
+Yandex.Data = (login as text,  columns as text,   start as text,  end as text, optional goals as text, optional model as text)=>
     let
+    goals2=if goals=null then "" else goals,
+    model2=if model=null then "" else model,
+    gam = if Text.Trim(goals2&model2)<>"" then [Goals=Text.Split(goals2,","),AttributionModels ={model2} ] else [],
     fields=Text.Split(Text.Replace(columns," ",""), ","),
     report_type = if List.Contains(fields,"Query") then "SEARCH_QUERY_PERFORMANCE_REPORT" else "CUSTOM_REPORT",
-    data = Json.FromValue([params= [SelectionCriteria= [DateFrom= date_func(start),DateTo=date_func(end)],
+    data = Json.FromValue([params= gam & [SelectionCriteria= [DateFrom= date_func(start),DateTo=date_func(end)],
     FieldNames= fields,
     ReportName= 
-    if end = "today" then login&columns&date_func(start)&date_func(end)&Text.From(Time.Hour(DateTime.LocalNow())) 
-    else login&columns&date_func(start)&date_func(end),
+    if end = "today" then login&columns&date_func(start)&date_func(end)&goals&model&Text.From(Time.Hour(DateTime.LocalNow())) 
+    else login&columns&date_func(start)&date_func(end)&goals2&model2,
     ReportType= report_type, DateRangeType= "CUSTOM_DATE", Format= "TSV", IncludeVAT= "YES",IncludeDiscount= "NO"]]),
     headers = [#"Client-Login" = login, #"Authorization"="Bearer "& Extension.CurrentCredential()[access_token],  #"processingMode"="offline", #"Accept-Language"="en", #"Content-Type"="application/json; charset = utf-8"],
     web1 =web_func(data, headers),
@@ -88,12 +102,10 @@ Yandex.Data = (login as text,  columns as text,   start as text,  end as text)=>
     final = 
     if  Table.RowCount(web)=1 then try Json.Document(web{0}[Column1])[error][error_string]&": "&Json.Document(web{0}[Column1])[error][error_detail] otherwise "Unknown error"
     else if Table.RowCount(web)=0 then "The response timeout is exceeded. Your report will be available in a minute!"
-    else try good(web,fields) otherwise "Can't get the final report. Try again!"
+    else try good(web) otherwise "Can't get the final report. Try again!"
     
 in
   final;
-
-
 
 
 
@@ -123,16 +135,26 @@ date_func= (dat)=>
        else dat;
 
 
-good=(web,fields)=>
+good=(web)=>
     let
-    a=Table.PromoteHeaders( Table.SplitColumn(Table.SelectRows(Table.Skip(web, 1), each not Text.Contains([Column1], "Total rows")), "Column1", Splitter.SplitTextByDelimiter("#(tab)", QuoteStyle.Csv), fields )),
+    fieldList = Text.Split(Table.FirstN(Table.Skip(web, 1),1){0}[Column1],"#(tab)"),
+    a=Table.PromoteHeaders( Table.SplitColumn(Table.SelectRows(Table.Skip(web, 1), each not Text.Contains([Column1], "Total rows")), "Column1", Splitter.SplitTextByDelimiter("#(tab)", QuoteStyle.Csv), fieldList )),
     b=try Table.TransformColumns(Table.TransformColumnTypes(a,{{"Cost", type number}}), {{"Cost", each _ / 1000000, type number}}) otherwise a
     in  b;
 
 
 // Data Source Kind description
 Yandex = [
-    TestConnection = (dataSourcePath) => { "Yandex.Direct",Json.Document(dataSourcePath)[login],Json.Document(dataSourcePath)[columns],Json.Document(dataSourcePath)[start],Json.Document(dataSourcePath)[end]},
+    TestConnection = (dataSourcePath) => 
+        { 
+        "Yandex.Direct",
+        Json.Document(dataSourcePath)[login],
+        Json.Document(dataSourcePath)[columns],
+        Json.Document(dataSourcePath)[start],
+        Json.Document(dataSourcePath)[end],
+        Json.Document(dataSourcePath)[goals]?,
+        Json.Document(dataSourcePath)[model]?
+        },
     Authentication = [
         
         OAuth = [
