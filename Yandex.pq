@@ -111,14 +111,14 @@ in
 
 web_func= (data,headers)=>
     let
-    web = Web.Contents("https://api.direct.yandex.com/", [Content = data, IsRetry = false, Headers = headers, ManualStatusHandling = {404, 400,500,401,402,403,501,502,503,504,505}, RelativePath = "json/v5/reports"]),       
+    web = Function.InvokeAfter(()=>Web.Contents("https://api.direct.yandex.com/", [Content = data, IsRetry = false, Headers = headers, ManualStatusHandling = {404, 400,500,401,402,403,501,502,503,504,505}, RelativePath = "json/v5/reports"]),#duration(0,0,0,1)),       
     col = Table.FromColumns({Lines.FromBinary(web, null, null, 65001)})
     in col;
 
 
 web_retry_func= (data,headers)=>
     let
-    web = Web.Contents("https://api.direct.yandex.com/", [Content = data, IsRetry = true, Headers = headers, ManualStatusHandling = {404, 400,500,401,402,403,501,502,503,504,505}, RelativePath = "json/v5/reports"]),       
+    web =  Function.InvokeAfter(()=>Web.Contents("https://api.direct.yandex.com/", [Content = data, IsRetry = true, Headers = headers, ManualStatusHandling = {404, 400,500,401,402,403,501,502,503,504,505}, RelativePath = "json/v5/reports"]),#duration(0,0,0,1)),       
     col = Table.FromColumns({Lines.FromBinary(web, null, null, 65001)})
     in col;
 
