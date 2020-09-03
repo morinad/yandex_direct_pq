@@ -26,12 +26,12 @@ FuncType = type function (
         Documentation.FieldDescription = "Enter the last date of your statistics. You can specify date in YYYY-MM-DD format or use dynamic formats: today, yesterday, 69daysAgo.",
         Documentation.SampleValues = {"yesterday"}
     ]),
-     optional goals as (type text meta [
+      goals as (type nullable text meta [
         Documentation.FieldCaption = "Goals:",
         Documentation.FieldDescription = "Goals list",
         Documentation.SampleValues = {"12345,01234,76543"}
     ]),
-     optional model as (type text meta [
+      model as (type nullable text meta [
         Documentation.FieldCaption = "Attribution model:",
         Documentation.FieldDescription = "Attribution model",
          Documentation.AllowedValues = { "FC", "LC", "LSC", "LYDC"}
@@ -71,7 +71,7 @@ windowWidth = 1000;
 windowHeight = 800;
 
 
-Yandex.Data = (login as text,  columns as text,   start as text,  end as text, optional goals as text, optional model as text)=>
+Yandex.Data = (login as text,  columns as text,   start as text,  end as text,  goals as nullable text,  model as nullable text)=>
     let
     goals2=if goals=null then "" else goals,
     model2=if model=null then "" else model,

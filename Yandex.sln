@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29926.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{4DF76451-A46A-4C0B-BE03-459FAAFA07E6}") = "Yandex", "Yandex\Yandex.mproj", "{B6391684-EAC9-4600-82D8-8A34DC2E46C7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B6391684-EAC9-4600-82D8-8A34DC2E46C7}.Debug|x86.ActiveCfg = Debug|x86
+		{B6391684-EAC9-4600-82D8-8A34DC2E46C7}.Debug|x86.Build.0 = Debug|x86
+		{B6391684-EAC9-4600-82D8-8A34DC2E46C7}.Release|x86.ActiveCfg = Release|x86
+		{B6391684-EAC9-4600-82D8-8A34DC2E46C7}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {622A286D-A24B-4DC1-B550-2511CE817566}
+	EndGlobalSection
+EndGlobal
