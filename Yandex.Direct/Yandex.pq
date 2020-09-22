@@ -139,8 +139,12 @@ good=(web)=>
     let
     fieldList = Text.Split(Table.FirstN(Table.Skip(web, 1),1){0}[Column1],"#(tab)"),
     a=Table.PromoteHeaders( Table.SplitColumn(Table.SelectRows(Table.Skip(web, 1), each not Text.Contains([Column1], "Total rows")), "Column1", Splitter.SplitTextByDelimiter("#(tab)", QuoteStyle.Csv), fieldList )),
-    b=try Table.TransformColumns(Table.TransformColumnTypes(a,{{"Cost", type number}}), {{"Cost", each _ / 1000000, type number}}) otherwise a
-    in  b;
+    b=try Table.TransformColumns(Table.TransformColumnTypes(a,{{"Cost", type number}}), {{"Cost", each _ / 1000000, type number}}) otherwise a,
+     type2 =try  Table.TransformColumnTypes(b,{{"Date", type date}}) otherwise b,
+    type3 =try Table.TransformColumnTypes(type2 ,{ {"Clicks", Int64.Type}}) otherwise type2 ,
+    type4 =try Table.TransformColumnTypes(type3 ,{ {"Impressions", Int64.Type}}) otherwise type3 
+
+    in  type4;
 
 
 // Data Source Kind description
