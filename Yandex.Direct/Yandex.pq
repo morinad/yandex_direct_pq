@@ -80,13 +80,14 @@ Yandex.Data = (login as text,  columns as text,   start as text,  end as text,  
     report_type = if List.Contains(fields,"Query") then "SEARCH_QUERY_PERFORMANCE_REPORT" else "CUSTOM_REPORT",
     data = Json.FromValue([params= gam & [SelectionCriteria= [DateFrom= date_func(start),DateTo=date_func(end)],
     FieldNames= fields,
+    Page = [Limit = 5000000],
     ReportName= 
     if end = "today" then login&columns&date_func(start)&date_func(end)&goals&model&Text.From(Time.Hour(DateTime.LocalNow())) 
     else login&columns&date_func(start)&date_func(end)&goals2&model2,
     ReportType= report_type, DateRangeType= "CUSTOM_DATE", Format= "TSV", IncludeVAT= "YES",IncludeDiscount= "NO"]]),
     headers = [#"Client-Login" = login, #"Authorization"="Bearer "& Extension.CurrentCredential()[access_token],  #"processingMode"="offline", #"Accept-Language"="en", #"Content-Type"="application/json; charset = utf-8"],
     web1 =web_func(data, headers),
-    web2=retry_func(web1,data, headers,5 ),
+    web2=retry_func(web1,data, headers,6 ),
     web3=retry_func(web2,data, headers,10 ),
     web4=retry_func(web3,data, headers,15 ),
     web5=retry_func(web4,data, headers,20 ),
@@ -111,14 +112,14 @@ in
 
 web_func= (data,headers)=>
     let
-    web = Function.InvokeAfter(()=>Web.Contents("https://api.direct.yandex.com/", [Content = data, IsRetry = false, Headers = headers, ManualStatusHandling = {404, 400,500,401,402,403,501,502,503,504,505}, RelativePath = "json/v5/reports"]),#duration(0,0,0,1)),       
+    web = Function.InvokeAfter(()=>Web.Contents("https://api.direct.yandex.com/", [Content = data, IsRetry = false, Headers = headers, ManualStatusHandling = {404, 400,500,401,402,403,501,502,503,504,505}, RelativePath = "json/v5/reports"]),#duration(0,0,0,2)),       
     col = Table.FromColumns({Lines.FromBinary(web, null, null, 65001)})
     in col;
 
 
 web_retry_func= (data,headers)=>
     let
-    web =  Function.InvokeAfter(()=>Web.Contents("https://api.direct.yandex.com/", [Content = data, IsRetry = true, Headers = headers, ManualStatusHandling = {404, 400,500,401,402,403,501,502,503,504,505}, RelativePath = "json/v5/reports"]),#duration(0,0,0,1)),       
+    web =  Function.InvokeAfter(()=>Web.Contents("https://api.direct.yandex.com/", [Content = data, IsRetry = true, Headers = headers, ManualStatusHandling = {404, 400,500,401,402,403,501,502,503,504,505}, RelativePath = "json/v5/reports"]),#duration(0,0,0,3)),       
     col = Table.FromColumns({Lines.FromBinary(web, null, null, 65001)})
     in col;
 
@@ -140,7 +141,7 @@ good=(web)=>
     fieldList = Text.Split(Table.FirstN(Table.Skip(web, 1),1){0}[Column1],"#(tab)"),
     a=Table.PromoteHeaders( Table.SplitColumn(Table.SelectRows(Table.Skip(web, 1), each not Text.Contains([Column1], "Total rows")), "Column1", Splitter.SplitTextByDelimiter("#(tab)", QuoteStyle.Csv), fieldList )),
     b=try Table.TransformColumns(Table.TransformColumnTypes(a,{{"Cost", type number}}), {{"Cost", each _ / 1000000, type number}}) otherwise a,
-     type2 =try  Table.TransformColumnTypes(b,{{"Date", type date}}) otherwise b,
+    type2 =try  Table.TransformColumnTypes(b,{{"Date", type date}}) otherwise b,
     type3 =try Table.TransformColumnTypes(type2 ,{ {"Clicks", Int64.Type}}) otherwise type2 ,
     type4 =try Table.TransformColumnTypes(type3 ,{ {"Impressions", Int64.Type}}) otherwise type3 
 
