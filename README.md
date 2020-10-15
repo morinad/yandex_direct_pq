@@ -8,7 +8,7 @@
 
 ### Как воспользоваться коннектором:
 
-1) Скачайте файл Yandex.mez: https://github.com/morinad/yandex_direct_pq/blob/master/Yandex.mez
+1) Скачайте файл Yandex.mez: https://github.com/morinad/yandex_direct_pq/raw/master/Yandex.mez
 
 2) Поместите файл Yandex.mez в папку C:\Users\USERNAME\Documents\Power BI Desktop\Custom Connectors, подставив USERNAME своего компьютера.
 
@@ -16,6 +16,15 @@
 
 4) Нажмите на кнопку "Получить данные", в поиске найдите коннектор Yandex.Direct. 
 Выбрвав коннектор, укажите необходимые параметры подключения.
+
+### Полезные ссылки:
+Подробные видео по использованию коннектора: 
+https://youtu.be/KsstjUr57F4
+https://youtu.be/ImbXM-kSObo
+
+Посмотреть какие приложения имеют доступ к аккаунту и отозвать токены: https://passport.yandex.ru/profile/access 
+
+Параметры и показатели Яндекс.Директ: https://yandex.ru/dev/direct/doc/reports/fields-list-docpage/
 
 
 
