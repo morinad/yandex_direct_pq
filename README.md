@@ -30,6 +30,6 @@ https://youtu.be/ImbXM-kSObo
 
 Параметры и показатели Яндекс.Директ: https://yandex.ru/dev/direct/doc/reports/fields-list-docpage/
 
-
+Справка API: https://yandex.ru/dev/direct/doc/reports/how-to.html/
 
 
