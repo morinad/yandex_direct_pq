@@ -32,4 +32,5 @@ https://youtu.be/ImbXM-kSObo
 
 Справка API: https://yandex.ru/dev/direct/doc/reports/how-to.html/
 
+Получение токена Директ: https://oauth.yandex.ru/authorize?response_type=token&client_id=5240a313fe8a4e2a92449b35cf09b64e&redirect_uri=https://oauth.yandex.ru/verification_code
 
