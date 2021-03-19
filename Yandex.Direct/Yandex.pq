@@ -26,6 +26,11 @@ FuncType = type function (
         Documentation.FieldDescription = "Enter the last date of your statistics. You can specify date in YYYY-MM-DD format or use dynamic formats: today, yesterday, 69daysAgo.",
         Documentation.SampleValues = {"yesterday"}
     ]),
+     delay as (type nullable text meta [
+        Documentation.FieldCaption = "Delay (sec):",
+        Documentation.FieldDescription = "Enter the delay between requests.",
+        Documentation.SampleValues = {"10"}
+    ]),
       goals as (type nullable text meta [
         Documentation.FieldCaption = "Goals:",
         Documentation.FieldDescription = "Goals list",
@@ -71,35 +76,40 @@ windowWidth = 1000;
 windowHeight = 800;
 
 
-Yandex.Data = (login as text,  columns as text,   start as text,  end as text,  goals as nullable text,  model as nullable text)=>
+Yandex.Data = (login as text,  columns as text,   start as text,  end as text, delay as nullable text,   goals as nullable text,  model as nullable text)=>
     let
     goals2=if goals=null then "" else goals,
     model2=if model=null then "" else model,
     gam = if Text.Trim(goals2&model2)<>"" then [Goals=Text.Split(goals2,","),AttributionModels ={model2} ] else [],
     fields=Text.Split(Text.Replace(columns," ",""), ","),
-    report_type = if List.Contains(fields,"Query") then "SEARCH_QUERY_PERFORMANCE_REPORT" else "CUSTOM_REPORT",
+    report_type = 
+        if List.Contains(fields,"Query") then "SEARCH_QUERY_PERFORMANCE_REPORT" 
+        else if List.Contains(fields,"ImpressionReach") then "REACH_AND_FREQUENCY_PERFORMANCE_REPORT" 
+        else "CUSTOM_REPORT",
     data = Json.FromValue([params= gam & [SelectionCriteria= [DateFrom= date_func(start),DateTo=date_func(end)],
     FieldNames= fields,
     Page = [Limit = 5000000],
     ReportName= 
-    if end = "today" then login&columns&date_func(start)&date_func(end)&goals&model&Text.From(Time.Hour(DateTime.LocalNow())) 
+    if end = "today" then login&columns&date_func(start)&date_func(end)&goals2&model2&Text.From(Time.Hour(DateTime.LocalNow())) 
     else login&columns&date_func(start)&date_func(end)&goals2&model2,
+
     ReportType= report_type, DateRangeType= "CUSTOM_DATE", Format= "TSV", IncludeVAT= "YES",IncludeDiscount= "NO"]]),
     headers = [#"Client-Login" = login, #"Authorization"="Bearer "& Extension.CurrentCredential()[access_token],  #"processingMode"="offline", #"Accept-Language"="en", #"Content-Type"="application/json; charset = utf-8"],
+    de = if delay = null then 20 else Number.From(delay),
     web1 =web_func(data, headers),
-    web2=retry_func(web1,data, headers,6 ),
+    web2=retry_func(web1,data, headers,5 ),
     web3=retry_func(web2,data, headers,10 ),
-    web4=retry_func(web3,data, headers,15 ),
-    web5=retry_func(web4,data, headers,20 ),
-    web6=retry_func(web5,data, headers,30 ),
-    web7=retry_func(web6,data, headers,20 ),
-    web8=retry_func(web7,data, headers,30 ),
-    web9=retry_func(web8,data, headers,20 ),
-    web10=retry_func(web9,data, headers,30 ),
-    web11=retry_func(web10,data, headers,20 ),
-    web12=retry_func(web11,data, headers,30 ),
-    web13=retry_func(web12,data, headers,20 ),
-    web=retry_func(web13,data, headers,30 ),
+    web4=retry_func(web3,data, headers,de ),
+    web5=retry_func(web4,data, headers,de ),
+    web6=retry_func(web5,data, headers,de ),
+    web7=retry_func(web6,data, headers,de ),
+    web8=retry_func(web7,data, headers,de ),
+    web9=retry_func(web8,data, headers,de ),
+    web10=retry_func(web9,data, headers,de ),
+    web11=retry_func(web10,data, headers,de ),
+    web12=retry_func(web11,data, headers,de ),
+    web13=retry_func(web12,data, headers,de ),
+    web=retry_func(web13,data, headers,de ),
     final = 
     if  Table.RowCount(web)=1 then try Json.Document(web{0}[Column1])[error][error_string]&": "&Json.Document(web{0}[Column1])[error][error_detail] otherwise "Unknown error"
     else if Table.RowCount(web)=0 then "The response timeout is exceeded. Your report will be available in a minute!"
@@ -157,6 +167,7 @@ Yandex = [
         Json.Document(dataSourcePath)[columns],
         Json.Document(dataSourcePath)[start],
         Json.Document(dataSourcePath)[end],
+        Json.Document(dataSourcePath)[delay]?,
         Json.Document(dataSourcePath)[goals]?,
         Json.Document(dataSourcePath)[model]?
         },
