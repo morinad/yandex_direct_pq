@@ -29,7 +29,7 @@ FuncType = type function (
      delay as (type nullable text meta [
         Documentation.FieldCaption = "Delay (sec):",
         Documentation.FieldDescription = "Enter the delay between requests.",
-        Documentation.SampleValues = {"10"}
+        Documentation.SampleValues = {"30"}
     ]),
       goals as (type nullable text meta [
         Documentation.FieldCaption = "Goals:",
@@ -116,7 +116,7 @@ Yandex.Data = (login as text,  columns as text,   start as text,  end as text, d
     else try good(web) otherwise "Can't get the final report. Try again!"
     
 in
-  final;
+  final ;
 
 
 
