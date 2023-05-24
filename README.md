@@ -13,7 +13,6 @@
 3) Продвинутый Power Query: https://directprorf.ru/pro?utm_source=github
 4) Создание коннекторов в Power Query: https://directprorf.ru/connectors?utm_source=github
 
-По всем вопросам, связанным с курсами и коннекторами: https://t.me/alexdirect или 8-916-978-77-46.
 
 ### Основные преимущества и дополнения:
 - поддерживает как стандартные отчёты, так и статистику по поисковым запросам,
