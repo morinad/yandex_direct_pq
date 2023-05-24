@@ -1,5 +1,10 @@
 # Коннектор к системе Яндекс.Директ для Power BI
 
+### Все коннекторы и поддержка:
+В рамках подписки "ПРО" на Boosty https://boosty.to/morinad вы получите:
+1) Все коннекторы mez для Power BI 
+2) Поддержку и ответы на вопросы
+
 ### Курсы для начинающих:
 1) Основы Power BI: https://directprorf.ru/basics?utm_source=github
 2) Из API -> в Excel и Power BI + коннекторы-функции: https://directprorf.ru/excel?utm_source=github
