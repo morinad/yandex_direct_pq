@@ -94,7 +94,7 @@ Yandex.Data = (login as text,  columns as text,   start as text,  end as text, d
     else login&columns&date_func(start)&date_func(end)&goals2&model2,
 
     ReportType= report_type, DateRangeType= "CUSTOM_DATE", Format= "TSV", IncludeVAT= "YES",IncludeDiscount= "NO"]]),
-    headers = [#"Client-Login" = login, #"Authorization"="Bearer "& Extension.CurrentCredential()[access_token],  #"processingMode"="offline", #"Accept-Language"="en", #"Content-Type"="application/json; charset = utf-8"],
+    headers = [#"Client-Login" = login, #"Authorization"="Bearer "& Extension.CurrentCredential()[Key],  #"processingMode"="offline", #"Accept-Language"="en", #"Content-Type"="application/json; charset = utf-8"],
     de = if delay = null then 20 else Number.From(delay),
     web1 =web_func(data, headers),
     web2=retry_func(web1,data, headers,5 ),
@@ -173,92 +173,11 @@ Yandex = [
         },
     Authentication = [
         
-        OAuth = [
-            StartLogin = StartLogin,
-            FinishLogin = FinishLogin,
-         //  Refresh=Refresh,
-         // Logout=Logout,
-            Label = "Log In"
-            ]
+         Key = []
+   
     ],
     Label = "Yandex Connection"
 ];
-
-// https://oauth.yandex.ru/authorize?response_type=code&client_id=5240a313fe8a4e2a92449b35cf09b64e
-
-StartLogin = (resourceUrl, state, display) =>
-    let
-        AuthorizeUrl = "https://oauth.yandex.ru/authorize?" & Uri.BuildQueryString([
-            response_type="code",
-            client_id="5240a313fe8a4e2a92449b35cf09b64e",
-            state = state,
-            force_confirm="yes",
-            redirect_uri = redirect_uri
-            ])
-    in
-        [
-            LoginUri = AuthorizeUrl,
-            CallbackUri = redirect_uri,
-            WindowHeight = windowHeight,
-            WindowWidth = windowWidth,
-            Context = "Hello"
-        ];
-
-FinishLogin = (context, callbackUri, state) =>
-    let
-        Parts = Uri.Parts(callbackUri)[Query]
-    in
-        TokenMethod(Text.From(Parts[code]));
-        
-    
-
-
-
-
-TokenMethod = (code ) =>
-    let
-         Response = Web.Contents("https://oauth.yandex.ru/token", [IsRetry=false, ManualStatusHandling={400},
-                Content = Text.ToBinary(Uri.BuildQueryString([
-                grant_type ="authorization_code",
-                client_id="5240a313fe8a4e2a92449b35cf09b64e",
-                code = code,
-                client_secret = "3fb1af1bb906491b9751cfaf6f04f9d0",
-                redirect_uri = redirect_uri
-                ])),
-                Headers=[#"Content-type" = "application/x-www-form-urlencoded",#"Accept" = "application/json"]]),
-        Body = Json.Document(Response)
-    in
-        Body;
-
-Refresh = (resourceUrl, refresh_token) =>
-    let
-         Response = Web.Contents("https://oauth.yandex.ru/token", [IsRetry=false, ManualStatusHandling={400},
-                Content = Text.ToBinary(Uri.BuildQueryString([
-                grant_type ="refresh_token",
-                refresh_token =refresh_token,
-                client_id="5240a313fe8a4e2a92449b35cf09b64e",
-                client_secret = "3fb1af1bb906491b9751cfaf6f04f9d0",
-                redirect_uri = redirect_uri
-                ])),
-                Headers=[#"Content-type" = "application/x-www-form-urlencoded",#"Accept" = "application/json"]]),
-        Body = Json.Document(Response)
-    in
-        Body;
-
-Logout = (token ) =>
-    let
-         Response = Web.Contents("https://oauth.yandex.ru/revoke_token", [ ManualStatusHandling={400},
-                Content = Text.ToBinary(Uri.BuildQueryString([
-                access_token=if token = null then "" else token,
-                client_id="5240a313fe8a4e2a92449b35cf09b64e",
-                client_secret = "3fb1af1bb906491b9751cfaf6f04f9d0"
-              //  device_id="0",
-                //redirect_uri = redirect_uri
-                ])),
-                Headers=[#"Content-type" = "application/x-www-form-urlencoded",#"Accept" = "application/json"]]),
-        Body = Json.Document(Response)
-    in
-        if Body[status]?="ok" then Body else [status="ne ok"];
 
 
 
