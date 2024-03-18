@@ -1,6 +1,6 @@
 # Коннектор к системе Яндекс.Директ для Power BI
 
-### Новые видео, статьи и полезности в Telegram: https://t.me/+2kqVrjV5aXs0NTRi 
+### Новые видео, статьи и полезности в Telegram-канале: https://t.me/+2kqVrjV5aXs0NTRi
 
 ### Все коннекторы и поддержка:
 В рамках подписки "ПРО" на Boosty https://boosty.to/morinad вы получите:
