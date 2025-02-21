@@ -15,7 +15,6 @@
 4) Коннекторы для Маркетплейсов: https://directprorf.ru/marketplaces?utm_source=github
 5) Продвинутый Power Query: https://directprorf.ru/pro?utm_source=github
 6) Создание коннекторов в Power Query: https://directprorf.ru/connectors?utm_source=github
-7) API ChatGPT для автоматизации бизнеса: https://directprorf.ru/chatgpt?utm_source=github
 
 
 ### Основные преимущества и дополнения:
